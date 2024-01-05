@@ -68,7 +68,7 @@ function Home() {
     controls.maxPolarAngle = Math.PI / 2; // 90도
 
     const initialPosition = new THREE.Vector3(0, 20, 0);
-    const targetPosition = new THREE.Vector3(0, 0, 10);
+    const targetPosition = new THREE.Vector3(0, 1, 10);
 
     smoothCameraAnimation(initialPosition, targetPosition, 3000, controls); // 1초 동안 애니메이션
 
