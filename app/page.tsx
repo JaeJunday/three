@@ -123,9 +123,40 @@ function Home() {
       renderer.setSize(newWidth, newHeight);
     };
 
-    window.addEventListener("resize", handleResize);
+    const onClick = (event: { clientX: number; clientY: number }) => {
+      // 마우스 좌표 정규화
+      const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+      );
+
+      // Raycaster 설정
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+
+      // Raycaster로 클릭 지점의 객체 검출
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      // 클릭된 객체 확인
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+
+        // 클릭된 객체가 큐브인지 확인
+        if (
+          clickedObject instanceof THREE.Mesh &&
+          clickedObject.geometry instanceof THREE.BoxGeometry
+        ) {
+          // 깃헙으로 이동
+          window.location.href = "https://github.com/JaeJunday";
+        }
+      }
+    };
+
+    // 클릭 이벤트 리스너 등록
+    window.addEventListener("click", onClick);
 
     return () => {
+      window.removeEventListener("click", onClick);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
