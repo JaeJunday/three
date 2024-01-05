@@ -6,6 +6,35 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as THREE from "three";
 
+function smoothCameraAnimation(
+  startPosition: THREE.Vector3,
+  endPosition: THREE.Vector3,
+  duration: number,
+  controls: OrbitControls
+) {
+  let startTime: number;
+
+  function animate(time: number) {
+    if (!startTime) startTime = time;
+
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    const newPosition = new THREE.Vector3().lerpVectors(
+      startPosition,
+      endPosition,
+      progress
+    );
+    controls.object.position.copy(newPosition);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
 function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -23,20 +52,12 @@ function Home() {
       0.1,
       1000
     );
-    camera.position.set(0, 20, 1);
 
     // 마우스 컨트롤러
     const controls = new OrbitControls(camera, canvas);
 
     controls.enableDamping = true;
     controls.dampingFactor = 0.2;
-
-    const initialPolarAngle = Math.PI / 4; // 45도
-    const initialAzimuthalAngle = 0; // 초기 수평 각도
-
-    // 초기 카메라 화각 설정
-    controls.getPolarAngle = () => initialPolarAngle;
-    controls.getAzimuthalAngle = () => initialAzimuthalAngle;
 
     // 최소 및 최대 줌 레벨 설정
     controls.minDistance = 3;
@@ -46,18 +67,39 @@ function Home() {
     controls.minPolarAngle = Math.PI / 6; // 30도
     controls.maxPolarAngle = Math.PI / 2; // 90도
 
-    // const cubeGeometry = new THREE.BoxGeometry();
-    // const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    // scene.add(cube);
+    const initialPosition = new THREE.Vector3(0, 20, 0);
+    const targetPosition = new THREE.Vector3(0, 0, 10);
 
-    // const planeGeometry = new THREE.PlaneGeometry(2, 2);
-    // const planeMaterial = new THREE.MeshBasicMaterial({
-    //   color: 0xff0000,
-    //   side: THREE.DoubleSide,
-    // });
-    // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    // scene.add(plane);
+    smoothCameraAnimation(initialPosition, targetPosition, 3000, controls); // 1초 동안 애니메이션
+
+    // 큐브에 텍스트를 입히는 부분
+    const cubeGeometry = new THREE.BoxGeometry();
+
+    // 캔버스 생성
+    const cubeCanvas = document.createElement("canvas");
+    const cubeText = cubeCanvas.getContext("2d");
+
+    // 텍스트 설정
+    if (cubeText) {
+      cubeText.font = "Bold 50px Arial";
+      cubeText.fillStyle = "#FFE490"; // fillStyle에 색상 문자열을 넣어줘야 합니다.
+      cubeText.fillText("JaeJunday", 15, 70);
+    }
+
+    // CanvasTexture 생성
+    const texture = new THREE.CanvasTexture(cubeCanvas);
+
+    // 큐브 메쉬 생성
+    const cubeMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      color: "white",
+    });
+
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(0, (cubeGeometry.parameters.height / 6) * 5, 0);
+
+    // 큐브를 씬에 추가
+    scene.add(cube);
 
     const loader = new GLTFLoader();
     loader.load("/assets/scene.gltf", (gltf) => {
@@ -88,12 +130,7 @@ function Home() {
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-screen absolute bottom-100 left-100"
-    ></canvas>
-  );
+  return <canvas ref={canvasRef} className="w-full h-screen"></canvas>;
 }
 
 export default Home;
