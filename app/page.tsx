@@ -81,9 +81,16 @@ function Home() {
 
     // 텍스트 설정
     if (cubeText) {
-      cubeText.font = "Bold 50px Arial";
-      cubeText.fillStyle = "#FFE490"; // fillStyle에 색상 문자열을 넣어줘야 합니다.
-      cubeText.fillText("JaeJunday", 15, 70);
+      const lines = [
+        { text: "JaeJunday", color: "#FFE490" },
+        { text: "click me ~ !", color: "#00FFFF" },
+      ];
+
+      lines.forEach((line, index) => {
+        cubeText.font = "Bold 40px Arial";
+        cubeText.fillStyle = line.color;
+        cubeText.fillText(line.text, 45, 55 + index * 60);
+      });
     }
 
     // CanvasTexture 생성
@@ -102,7 +109,7 @@ function Home() {
     scene.add(cube);
 
     const loader = new GLTFLoader();
-    loader.load("/assets/scene.gltf", (gltf) => {
+    loader.load("/assets/scene.gltf", (gltf: { scene: any }) => {
       scene.add(gltf.scene);
 
       const animate = () => {
@@ -147,7 +154,7 @@ function Home() {
           clickedObject.geometry instanceof THREE.BoxGeometry
         ) {
           // 깃헙으로 이동
-          window.location.href = "https://github.com/JaeJunday";
+          window.open("https://github.com/JaeJunday", "_blank");
         }
       }
     };
